@@ -2,7 +2,8 @@ import ray
 from ray import tune
 from ray.tune import run_experiments
 from ray.tune.analysis.experiment_analysis import ExperimentAnalysis
-from sklearn.datasets import load_iris
+#from sklearn.datasets import load_iris
+from sklearn.datasets import fetch_covtype
 from sklearn.ensemble import RandomForestClassifier
 from sklearn.model_selection import cross_val_score
 
@@ -16,8 +17,10 @@ config = {
 
 # Step 4: Implement the train function
 def train_rf(config):
-    iris = load_iris()
-    X, y = iris.data, iris.target
+    #iris = load_iris()
+    covtype = fetch_covtype()
+    #X, y = iris.data, iris.target
+    X, y = covtype.data, covtype.target
     model = RandomForestClassifier(
         max_depth=config["max_depth"],
         n_estimators=config["n_estimators"],
@@ -53,8 +56,10 @@ print("Best trial config: ", best_config)
 print("Best trial mean accuracy: ", best_trial.last_result["mean_accuracy"])
 
 # Train the RandomForestClassifier model with the best hyperparameters
-iris = load_iris()
-X, y = iris.data, iris.target
+#iris = load_iris()
+#X, y = iris.data, iris.target
+covtype = fetch_covtype()
+X, y = covtype.data, covtype.target
 best_model = RandomForestClassifier(
     max_depth=best_config["max_depth"],
     n_estimators=best_config["n_estimators"],
