@@ -7,8 +7,11 @@ import time
 # Load the covtype dataset
 covtype = fetch_covtype()
 
+# Use only the first 10000 samples
+X, y = covtype.data[:10000], covtype.target[:10000]
+
 # Split the dataset into training and testing sets
-X_train, X_test, y_train, y_test = train_test_split(covtype.data, covtype.target, test_size=0.2, random_state=42)
+X_train, X_test, y_train, y_test = train_test_split(X, y, test_size=0.2, random_state=42)
 
 # Initialize a Random Forest classifier with default parameters
 rfc = RandomForestClassifier()

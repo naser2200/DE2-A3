@@ -2,25 +2,25 @@ import ray
 from ray import tune
 from ray.tune import run_experiments
 from ray.tune.analysis.experiment_analysis import ExperimentAnalysis
-#from sklearn.datasets import load_iris
 from sklearn.datasets import fetch_covtype
 from sklearn.ensemble import RandomForestClassifier
 from sklearn.model_selection import cross_val_score
 
-# Step 3: Configure the search space
+#Step 3: Configure the search space
+
 config = {
-    "max_depth": tune.randint(1, 20),  # Sample values from 1 to 20
-    "n_estimators": tune.randint(10, 200),  # Sample values from 10 to 200
-    "ccp_alpha": tune.loguniform(1e-6, 1e-2),  # Sample values from a log-scaled distribution
+    "max_depth": tune.grid_search([10, 20, 30, None]),
+    "n_estimators": tune.grid_search([100, 200, 300]),
+    "ccp_alpha": tune.grid_search([0.0, 0.1, 0.2])
 }
-
-
 # Step 4: Implement the train function
 def train_rf(config):
-    #iris = load_iris()
+
     covtype = fetch_covtype()
-    #X, y = iris.data, iris.target
-    X, y = covtype.data, covtype.target
+    # Select the first 10,000 samples
+    X = covtype.data[:10000]
+    y = covtype.target[:10000]
+    #X, y = covtype.data, covtype.target
     model = RandomForestClassifier(
         max_depth=config["max_depth"],
         n_estimators=config["n_estimators"],
@@ -41,7 +41,7 @@ run_experiments({
         "run": train_rf,
         "config": config,
         "num_samples": 50,
-        "resources_per_trial": {"cpu": 2},
+        "resources_per_trial": {"cpu": 1},
         "stop": {"mean_accuracy": 0.99},
     }
 })
@@ -54,16 +54,3 @@ best_config = best_trial.config
 # Print the best trial config and mean accuracy
 print("Best trial config: ", best_config)
 print("Best trial mean accuracy: ", best_trial.last_result["mean_accuracy"])
-
-# Train the RandomForestClassifier model with the best hyperparameters
-#iris = load_iris()
-#X, y = iris.data, iris.target
-covtype = fetch_covtype()
-X, y = covtype.data, covtype.target
-best_model = RandomForestClassifier(
-    max_depth=best_config["max_depth"],
-    n_estimators=best_config["n_estimators"],
-    ccp_alpha=best_config["ccp_alpha"],
-    random_state=42,
-)
-best_model.fit(X, y)
